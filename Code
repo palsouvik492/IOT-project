@@ -1,0 +1,77 @@
+# The Arduino Code:
+
+
+#include<ESP8266WiFi.h>
+#include<WiFiClient.h>
+#include<ThingSpeak.h>
+#include<ESP8266WebServer.h>
+const char* ssid = "souvik"; // SSID Name should be given so that
+WiFi Connectionscabe placed
+const char* password = "12345678987"; // SSID Password
+WiFiClient client;
+// Details obtained form ThingSpeak
+unsigned long myChannelNumber = 2548046; // Channel name
+const char* myWriteAPIKey = "XDWYQX067FOCXOHT"; // Write API Key
+const char* myReadAPIKey = "5S9JSWQXZA1JF5L5"; // Read API Key
+// Declaring Pins for connection
+int ir1 =D6; //OUT pin coonected to D6
+int led1 = D5; // one Terminal of LED is coonected to D5
+int ldr = A0; // Signal pin of LDR
+int led_1 = 0;
+void setup() {
+Serial.begin(9600);
+delay(100);
+pinMode(ldr, INPUT);
+pinMode(ir1,INPUT);
+pinMode(led1,OUTPUT);
+WiFi.begin(ssid,password);
+Serial.print("Connecting");
+/Wait for connection
+while(WiFi.status() != WL_CONNECTED){
+delay(500);
+Serial.print(".");
+}
+//If connection successful show IP address in serial monitor
+Serial.println("");
+Serial.print("Connected to ");
+Serial.println(ssid);
+Serial.print("IP address ");
+Serial.println(WiFi.localIP());
+ThingSpeak.begin(client);
+}
+void loop() {
+int s1 = digitalRead(ir1);
+int val = analogRead(ldr);
+Serial.print("IR value: ");
+Serial.print(s1);
+Serial.print(" | LDR Value: ");
+Serial.print(val);
+Serial.println();
+if(val>750) // 750 represents the Light intensity
+{
+if(s1==1) // If IR senses any object in fornt of it will signal 0
+{
+digitalWrite(led1,HIGH);
+}
+else
+{
+digitalWrite(led1,LOW);
+}
+}
+else
+{
+digitalWrite(led1,LOW);
+}
+ThingSpeak.writeField(myChannelNumber,1,val,myWriteAPIKey);
+ThingSpeak.writeField(myChannelNumber,2,s1,myWriteAPIKey);
+ThingSpeak.writeField(myChannelNumber,5,led1,myWriteAPIKey);
+led_1 = ThingSpeak.readIntField(myChannelNumber,5,myReadAPIKey);
+if(led_1==1)
+{
+digitalWrite(led1,HIGH);
+}
+else
+{
+digitalWrite(led1,LOW);
+}
+}
