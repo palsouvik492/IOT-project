@@ -1,5 +1,5 @@
 # The Arduino Code:
-
+Board used - ESP8266 nodeMCU (having inbuilt WiFi Module)
 
 #include<ESP8266WiFi.h>
 #include<WiFiClient.h>
